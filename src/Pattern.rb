@@ -6,14 +6,8 @@ class Pattern
     @proc_asociado= block
   end
 
-  def call
-    self.matchers.each { |matcher|
-      if matcher.binder
-        self.singleton_class.send(:attr_accessor, matcher.symbol)
-        self.singleton_class.send("#{matcher.symbol}=".to_sym,matcher.objeto_Bindeado)
-      end}
+  def call(pattern_matcher)
     @proc_asociado.call
-
   end
 
 end
@@ -28,6 +22,16 @@ class PatternWith < Pattern
 
   def matches
     @matchers.all?{ |m| m.call(@an_object) }
+  end
+
+  def call(pattern_matcher)
+    self.matchers.each { |matcher|
+      if matcher.is_a? Symbol
+        pattern_matcher.singleton_class.send(:attr_accessor, matcher)
+        pattern_matcher.send(:define_singleton_method, "#{matcher.to_s}"){return @an_object}
+      end}
+    super
+
   end
 
 end

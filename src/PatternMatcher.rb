@@ -15,7 +15,7 @@ class PatternMatcher
 
   def match(pattern)
       if pattern.matches and !@has_matched
-        pattern.call
+        pattern.call(self)
         @has_matched= true
       end
   end
