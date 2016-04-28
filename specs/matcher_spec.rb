@@ -1,8 +1,19 @@
 require 'rspec'
 require_relative '../src/Matcher'
 require_relative '../src/Pattern'
-require_relative '../src/PatternMatcher'
+#require_relative '../src/PatternMatcher'
 
+
+describe 'Binder' do
+
+  it 'bind' do
+    bool =:a_variable_name.call('anything')
+    expect(bool).to eq(true)
+  end
+
+end
+
+=begin
 describe 'matcher' do
 
   it 'val' do
@@ -75,3 +86,4 @@ describe 'Pattern matcher' do
   end
 
 end
+=end

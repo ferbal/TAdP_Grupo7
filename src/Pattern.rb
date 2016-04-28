@@ -7,7 +7,13 @@ class Pattern
   end
 
   def call
+    self.matchers.each { |matcher|
+      if matcher.binder
+        self.singleton_class.send(:attr_accessor, matcher.symbol)
+        self.singleton_class.send("#{matcher.symbol}=".to_sym,matcher.objeto_Bindeado)
+      end}
     @proc_asociado.call
+
   end
 
 end
