@@ -25,11 +25,8 @@ class PatternWith < Pattern
   end
 
   def call(pattern_matcher)
-    self.matchers.each { |matcher|
-      if matcher.is_a? Symbol
-        pattern_matcher.singleton_class.send(:attr_accessor, matcher)
-        pattern_matcher.send(:define_singleton_method, "#{matcher.to_s}"){return @an_object}
-      end}
+    @matchers.each { |matcher|
+      matcher.bind_with(@an_object, pattern_matcher) }
     super
 
   end
