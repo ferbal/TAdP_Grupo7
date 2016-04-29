@@ -1,5 +1,5 @@
-class Matcher
 
+class Matcher
   def val(value)
     return Proc.new {|n| n == value }
   end
@@ -37,3 +37,14 @@ class Matcher
   end
 
 end
+
+class Symbol
+  def Call(value)
+
+    self.instance_variable_set "@#{self.to_s}",value
+
+
+  end
+end
+
+ :a.Call("Hola")
