@@ -61,36 +61,39 @@ end
      @mproc.call obj
    end
 
-   def list(list, *match_size)
+   def list(list_from_parameters, match_size = true)
 
-     raise "Exceso de Parametros" if match_size.count>1
+     #raise "Exceso de Parametros" if match_size.count>1
 
-     match_size[0] = true if match_size.empty?
+     #match_size[0] = true if match_size.empty?
 
-     @mproc= Proc.new do |n|
-       (match_size.first == true && n.count == list.count && compare_array_elements(n,list)) || match_size.first == false && compare_array_elements(n,list)
+     @mproc= Proc.new do |list_from_proc|
+       (match_size == true && list_from_proc.count == list_from_parameters.count && compare_array_elements(list_from_proc,list_from_parameters)) || match_size == false && compare_array_elements(list_from_proc,list_from_parameters)
      end
-
 
    end
 
-   def compare_array_elements(list1, list2)
-     flag = true
-     i = 0
+   def compare_array_elements(list_from_proc, list_from_parameters)
 
-     list2.each do |e|
+     has_match = true
 
-       if flag then
-         if e.is_a? (Matcher) or e.is_a? Symbol
-           flag= self.bind_and_call(e, list1[i])
-         else
-           flag = e.equal? list1[i]
-         end
-       end
-       i = i+1
+     list_from_parameters.each do |element_param|
+
+       element_index = list_from_parameters.rindex(element_param)
+       element_param.equal? list_from_proc[element_index]
+
+       value_to_bind = list_from_proc[element_index]
+       is_symbol_or_matcher = (element_param.is_a? (Matcher) or element_param.is_a? Symbol)
+
+       has_match = self.bind_and_call(element_param, value_to_bind) if (has_match and is_symbol_or_matcher)
+       has_match = element_param.equal? list_from_proc[element_index] if (has_match and !is_symbol_or_matcher)
+
+       break unless has_match
+
      end
 
-     return flag
+     return has_match
+
    end
 
    #combinators
