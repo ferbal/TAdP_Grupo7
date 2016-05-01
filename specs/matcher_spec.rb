@@ -32,13 +32,63 @@ describe 'Binder' do
 
   it 'List Binded Patterns' do
     result='no llegue a nada'
-    matches?([1,2]) do
-      with(list([:x,:y])) { result= x + y }
+    matches?([1, 2]) do
+      with(list([:x, :y])) { result= x + y }
       with(:a) { result= a + 4 }
       otherwise { result='aca no llega' }
     end
     expect(result).to eq(3)
   end
+
+  it 'Combinator Binded Pattern' do
+    result='no llegue a nada'
+    matches?('Peter') do
+      with(:x.and(type(String))) { result = x + ' te saluda' }
+      otherwise { result = 'aca no llega' }
+    end
+    expect(result).to eq('Peter te saluda')
+  end
+
+  it 'Negated Combinator Binded Pattern' do
+    result='no llegue a nada'
+    matches?('Peter') do
+      with(:x.and(type(Fixnum)).not) { result = x + ' te saluda' }
+      otherwise { result = 'aca no llega' }
+    end
+    expect(result).to eq('Peter te saluda')
+  end
+
+  it 'Combinator Binded Pattern 2' do
+    result='no llegue a nada'
+    matches?('Peter') do
+      with(type(String).and(duck(:count), :x)) { result = x + ' te saluda' }
+      otherwise { result = 'aca no llega' }
+    end
+    expect(result).to eq('Peter te saluda')
+  end
+
+  it 'List + Combinator Binded Pattern' do
+    result = 'no llegue a nada'
+    matches?([1, 2, Object.new]) do
+      with(list([duck(:+).and(type(Fixnum), :x),
+                 :y.or(val(4)), duck(:+).not])) { result= x + y }
+      otherwise { result = 'aca no llega' }
+    end
+    expect(result).to eq(3)
+  end
+
+  it 'List + Combinator de Combinators Binded Pattern' do
+    result = 'este test es un aberracion'
+    matches?([1, 2, Object.new]) do
+      with(list([duck(:+).and(duck(:push).or(type(Fixnum)), type(Object).not.or(:x)),
+                 :y.or(val(4)), duck(:+).not])) { result= x + y }
+      otherwise { result = 'aca no llega' }
+    end
+    expect(result).to eq(3)
+  end
+
+
+
 end
 
 describe 'matcherVal' do
@@ -82,7 +132,7 @@ describe 'matcherList' do
     #También pueden combinarse con el Matcher de Variables
     result = pm.list([:a, :b, :c, :d]).call(an_array) #=> true
     expect(result).to eq(true)
-    result = pm.list([val(1),type(Integer),val(3),val(4)]).call(an_array)
+    result = pm.list([val(1), type(Integer), val(3), val(4)]).call(an_array)
     expect(result).to eq(true)
     #puts pm.val(5).call(5).to_s
 
