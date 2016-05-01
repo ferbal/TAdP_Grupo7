@@ -1,49 +1,29 @@
-Symbol.send(:define_method, :call) do
-|obj|
-  true
+class Symbol
+  def call(obj)
+    true
+  end
+
+  def bind_with(obj, pattern_matcher)
+    pattern_matcher.define_singleton_method(self){obj}
+  end
+
+  def and(*matchers)
+    matchers.push self
+    matcher = matchers.shift
+    matcher.and(*matchers)
+  end
+
+  def or(*matchers)
+    matchers.push self
+    matcher = matchers.shift
+    matcher.or(*matchers)
+  end
+
+  def not
+    false
+  end
 end
 
-Symbol.send(:define_method, :bind_with) do
-  |obj, pattern_matcher| pattern_matcher.define_singleton_method(self){obj}
-end
-
-# #Variante 1 (sin clase Matcher, pero tiene que modificar Proc)
-# begin
-#   def val(obj)
-#     Proc.new { |n| n == obj }
-#   end
-#
-#   def type(obj)
-#     Proc.new { |n| n.is_a?(obj) }
-#   end
-#
-#   def duck(*method_list)
-#     Proc.new {
-#         |instance| method_list.all? {
-#         # |m| instance.class.instance_methods.include?(m)
-#           |m| instance.methods.include? m
-#       }
-#     }
-#   end
-#
-#
-#   #combinators
-#   Proc.send(:define_method, :and) do
-#   |block|
-#     Proc.new { |n| block.call(n) and self.to_proc.call(n) }
-#   end
-#
-#   Proc.send(:define_method, :or) do
-#   |block|
-#     Proc.new { |n| block.call(n) or self.to_proc.call(n) }
-#   end
-#
-#   Proc.send(:define_method, :not) do
-#     Proc.new { |n| !self.to_proc.call(n) }
-#   end
-# end
-
-#Variante 2 (con clase Matcher)
 
 def val(obj)
   Matcher.new {|n| n == obj}
@@ -54,13 +34,13 @@ def type(obj)
 end
 
 def list(list, *match_size)
-  m=MatcherList.new
+  m=Matcher.new
   m.list(list, *match_size)
   return m
 end
 
   def duck(*method_list)
-    MatcherDuck.new {
+    Matcher.new {
         |instance| method_list.all? {
         # |m| instance.class.instance_methods.include?(m)
           |m| instance.methods.include? m
@@ -79,10 +59,6 @@ end
 
    def call(obj)
      @mproc.call obj
-   end
-
-   def bind_with(obj, pattern_matcher)
-      true
    end
 
    def list(list, *match_size)
@@ -106,11 +82,7 @@ end
 
        if flag then
          if e.is_a? (Matcher) or e.is_a? Symbol
-           flag=e.call(list1[i])
-            if e.is_a? Symbol
-              @vars.push(e)
-              self.define_singleton_method(e){list1[i]}
-            end
+           flag= self.bind_and_call(e, list1[i])
          else
            flag = e.equal? list1[i]
          end
@@ -122,29 +94,35 @@ end
    end
 
    #combinators
-   def and(matcher)
-     Matcher.new {|n| matcher.call(n) and self.call(n)}
+   def and(*matchers)
+     matchers<< self
+     m= Matcher.new {|n| matchers.all?{|matcher| m.bind_and_call(matcher, n)}}
+
    end
 
-   def or(matcher)
-     Matcher.new{|n| matcher.call(n) or self.call(n)}
+   def or(*matchers)
+     matchers<< self
+     m=Matcher.new {|n| matchers.any?{|matcher| m.bind_and_call(matcher, n)}}
    end
 
    def not
-     Matcher.new{|n| !self.call(n)}
+     m=Matcher.new{|n| !m.bind_and_call(self, n)}
    end
 
- end
+   def bind_and_call(matcher, obj)
+     result = matcher.call(obj)
+     if matcher.is_a? Symbol
+       self.vars.push(matcher)
+       self.define_singleton_method(matcher){obj}
+     elsif !matcher.vars.empty?
+       matcher.vars.each{|var| self.define_singleton_method(var){matcher.send(var)}}
+       self.vars.push(*matcher.vars)
+     end
+     result
+   end
 
-class MatcherList < Matcher
   def bind_with(obj, pattern_matcher)
     @vars.each {|e| m=self.send(e)
     pattern_matcher.define_singleton_method(e){m}}
-  end
-end
-
-class MatcherDuck < Matcher
-  def bind_with(obj, pattern_matcher)
-    true
   end
 end
