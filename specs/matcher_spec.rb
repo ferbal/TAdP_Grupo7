@@ -12,77 +12,69 @@ describe 'Binder' do
   end
 
   it 'Binded Pattern' do
-    result='no llegue a nada'
-    matches?(5) do
-      with(:x, type(Integer)) { result= x + 1 }
-      otherwise { result='aca no llega' }
+    result = matches?(5) do
+      with(:x, type(Integer)) { x + 1 }
+      otherwise { 'aca no llega' }
     end
     expect(result).to eq(6)
   end
 
   it 'Multiple Binded Patterns' do
-    result='no llegue a nada'
-    matches?(5) do
-      with(:x, type(Module)) { result= x + 1 }
-      with(:a) { result= a + 4 }
-      otherwise { result='aca no llega' }
+    result = matches?(5) do
+      with(:x, type(Module)) { x + 1 }
+      with(:a) { a + 4 }
+      otherwise { 'aca no llega' }
     end
     expect(result).to eq(9)
   end
 
   it 'List Binded Patterns' do
-    result='no llegue a nada'
-    matches?([1, 2]) do
-      with(list([:x, :y])) { result= x + y }
-      with(:a) { result= a + 4 }
-      otherwise { result='aca no llega' }
+    result = matches?([1, 2]) do
+      with(list([:x, :y])) { x + y }
+      with(:a) { a + 4 }
+      otherwise { 'aca no llega' }
     end
     expect(result).to eq(3)
   end
 
   it 'Combinator Binded Pattern' do
-    result='no llegue a nada'
-    matches?('Peter') do
-      with(:x.and(type(String))) { result = x + ' te saluda' }
-      otherwise { result = 'aca no llega' }
+    result = matches?('Peter') do
+      with(:x.and(type(String))) { x + ' te saluda' }
+      otherwise { 'aca no llega' }
     end
     expect(result).to eq('Peter te saluda')
   end
 
   it 'Negated Combinator Binded Pattern' do
-    result='no llegue a nada'
-    matches?('Peter') do
-      with(:x.and(type(Fixnum)).not) { result = x + ' te saluda' }
-      otherwise { result = 'aca no llega' }
+    result = matches?('Peter') do
+      with(:x.and(type(Fixnum)).not) { x + ' te saluda' }
+      otherwise { 'aca no llega' }
     end
     expect(result).to eq('Peter te saluda')
   end
 
   it 'Combinator Binded Pattern 2' do
-    result='no llegue a nada'
-    matches?('Peter') do
-      with(type(String).and(duck(:count), :x)) { result = x + ' te saluda' }
-      otherwise { result = 'aca no llega' }
+    result = matches?('Peter') do
+      with(type(String).and(duck(:count), :x)) { x + ' te saluda' }
+      otherwise { 'aca no llega' }
     end
     expect(result).to eq('Peter te saluda')
   end
 
   it 'List + Combinator Binded Pattern' do
-    result = 'no llegue a nada'
-    matches?([1, 2, Object.new]) do
+    result = matches?([1, 2, Object.new]) do
       with(list([duck(:+).and(type(Fixnum), :x),
-                 :y.or(val(4)), duck(:+).not])) { result= x + y }
-      otherwise { result = 'aca no llega' }
+                 :y.or(val(4)), duck(:+).not])) { x + y }
+      otherwise { 'aca no llega' }
     end
     expect(result).to eq(3)
   end
 
   it 'List + Combinator de Combinators Binded Pattern' do
-    result = 'este test es un aberracion'
-    matches?([1, 2, Object.new]) do
+    result = matches?([1, 2, Object.new]) do
       with(list([duck(:+).and(duck(:push).or(type(Fixnum)), type(Object).not.or(:x)),
-                 :y.or(val(4)), duck(:+).not])) { result= x + y }
-      otherwise { result = 'aca no llega' }
+                 :y.or(val(4)), duck(:+).not])) { x + y }
+      otherwise { 'aca no llega' }
     end
     expect(result).to eq(3)
   end
@@ -206,24 +198,24 @@ describe 'matcherDuck' do
     expect(result).to eq(true)
   end
 
-  it 'cuack and fly' do
-
+  it 'cuack and fly with psyduck' do
     result = duck(:cuack, :fly).call(psyduck) #=> true
     expect(result).to eq(true)
+  end
 
+  it 'cuack and fly with a dragon' do
     result = duck(:cuack, :fly).call(a_dragon) #=> false
     expect(result).to eq(false)
+  end
 
+  it 'a dragon can fly?' do
     result = duck(:fly).call(a_dragon) #=> true
     expect(result).to eq(true)
-
   end
 
   it 'object to string' do
-
     result = duck(:to_s).call(Object.new) #=> true
     expect(result).to eq(true)
-
   end
 end
 
@@ -277,13 +269,19 @@ end
 describe 'Pattern matcher' do
 
   it 'Pattern matching' do
-    result='no llegue a nada'
-    matches?(5) do
-      with(type(Module).and(val(5))) { result = 'aca no matchea' }
-      with(type(Integer)) { result='aca matchea' }
-      otherwise { result='aca no llega' }
+    result = matches?(5) do
+      with(type(Module).and(val(5))) { 'aca no matchea' }
+      with(type(Integer)) { 'aca matchea' }
+      otherwise { 'aca no llega' }
     end
     expect(result).to eq('aca matchea')
   end
 
+  it 'Pattern matching no matching' do
+    result = matches?(5) do
+      with(type(Module).and(val(5))) { 'aca no matchea' }
+      with(type(Symbol)) { 'aca matchea' }
+    end
+    expect(result).to eq('No match')
+  end
 end

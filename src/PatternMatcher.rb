@@ -1,12 +1,16 @@
 def matches?(obj, &block)
   m = PatternMatcher.new obj
   m.instance_eval &block
-  #TODO agregar aca comportamiento para manejar la situacion donde no matchea con nada
+  if m.has_matched
+    m.result
+  else
+    'No match'
+  end
 end
 
 class PatternMatcher
 
-  attr_accessor :an_object, :has_matched
+  attr_accessor :an_object, :has_matched, :result
 
   def initialize(obj)
     @an_object= obj
@@ -14,9 +18,9 @@ class PatternMatcher
   end
 
   def match(pattern)
-      if pattern.matches and !@has_matched
-        pattern.call(self)
-        @has_matched= true
+      if !@has_matched and pattern.matches
+        @result = pattern.call(self)
+        @has_matched = true
       end
   end
 
