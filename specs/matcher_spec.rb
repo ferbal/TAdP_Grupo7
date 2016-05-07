@@ -278,10 +278,9 @@ describe 'Pattern matcher' do
   end
 
   it 'Pattern matching no matching' do
-    result = matches?(5) do
+    expect{ matches?(5) do
       with(type(Module).and(val(5))) { 'aca no matchea' }
       with(type(Symbol)) { 'aca matchea' }
-    end
-    expect(result).to eq('No match')
+    end }.to raise_error(PatternMatcherException)
   end
 end

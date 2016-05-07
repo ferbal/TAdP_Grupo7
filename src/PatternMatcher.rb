@@ -4,7 +4,7 @@ def matches?(obj, &block)
   if m.has_matched
     m.result
   else
-    'No match'
+    raise PatternMatcherException, 'No matches!'
   end
 end
 
@@ -34,6 +34,7 @@ class PatternMatcher
     match pattern
   end
 
-  
+end
 
+class PatternMatcherException < Exception
 end
