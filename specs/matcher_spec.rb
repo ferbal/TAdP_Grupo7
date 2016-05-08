@@ -1,6 +1,4 @@
 require 'rspec'
-require_relative '../src/Matcher'
-require_relative '../src/Pattern'
 require_relative '../src/PatternMatcher'
 
 
@@ -78,90 +76,96 @@ describe 'Binder' do
     end
     expect(result).to eq(3)
   end
-
-
-
 end
 
 describe 'matcherVal' do
-
+  pm = PatternMatcher.new
   it 'val' do
-    bool = val(5).call(5)
+    bool = pm.instance_eval do
+      val(5).call(5)
+    end
     expect(bool).to eq(true)
   end
 end
 
 describe 'matcherType' do
+  pm = PatternMatcher.new
+
   it 'type' do
-    bool = type(Integer).call(5)
+    bool = pm.instance_eval do
+      type(Integer).call(5)
+    end
     expect(bool).to eq(true)
   end
 end
 
 describe 'matcherList' do
+  pm = PatternMatcher.new
+  an_array = [1, 2, 3, 4]
 
   it 'Verificar casos con match_size TRUE' do
-
-    pm = Matcher.new
-    an_array = [1, 2, 3, 4]
-
     #list(values, match_size?)
-    result = pm.list([1, 2, 3, 4], true).call(an_array) #=> true
+    result = pm.instance_eval do
+        list([1, 2, 3, 4], true).call(an_array) #=> true
+    end
     expect(result).to eq(true)
 
-    result = pm.list([1, 2, 3], true).call(an_array) #=> false
+    result = pm.instance_eval do
+        list([1, 2, 3], true).call(an_array) #=> false
+    end
     expect(result).to eq(false)
 
-    result = pm.list([2, 1, 3, 4], true).call(an_array) #=> false
+    result = pm.instance_eval do
+        list([2, 1, 3, 4], true).call(an_array) #=> false
+    end
     expect(result).to eq(false)
 
   end
 
   it 'Verificar casos con Match_Size FALSE' do
-
-    pm = Matcher.new
-    an_array = [1, 2, 3, 4]
-
     #list(values, match_size?)
-    result= pm.list([1, 2, 3, 4], false).call(an_array) #=> true
+    result = pm.instance_eval do
+      list([1, 2, 3, 4], false).call(an_array)
+    end #=> true
     expect(result).to eq(true)
 
-    result= pm.list([1, 2, 3], false).call(an_array) #=> true
+    result= pm.instance_eval do
+      list([1, 2, 3], false).call(an_array)#=> true
+    end
     expect(result).to eq(true)
 
-    result = pm.list([2, 1, 3, 4], false).call(an_array) #=> false
+    result = pm.instance_eval do
+      list([2, 1, 3, 4], false).call(an_array) #=> false
+    end
     expect(result).to eq(false)
 
   end
 
   it 'Cuando no se especifica el parametro Match_Size' do
 
-    pm = Matcher.new
-    an_array = [1, 2, 3, 4]
-
     #Si no se especifica, match_size? se considera true
-    result = pm.list([1, 2, 3]).call(an_array) #=> false
+    result = pm.instance_eval do
+        list([1, 2, 3]).call(an_array) #=> false
+    end
     expect(result).to eq(false)
 
   end
 
   it 'Combinar Matcher de variables' do
 
-    pm = Matcher.new
-    an_array = [1, 2, 3, 4]
-
     #También pueden combinarse con el Matcher de Variables
-    result = pm.list([:a, :b, :c, :d]).call(an_array) #=> true
+    result = pm.instance_eval do
+        list([:a, :b, :c, :d]).call(an_array) #=> true
+    end
     expect(result).to eq(true)
 
   end
 
   it 'Combinar con Matcher VAL y TYPE' do
 
-    pm = Matcher.new
-    an_array = [1, 2, 3, 4]
-
-    result = pm.list([val(1), type(Integer), val(3), val(4)]).call(an_array)
+    result = pm.instance_eval do
+        list([val(1), type(Integer), val(3), val(4)]).call(an_array)
+    end
     expect(result).to eq(true)
 
   end
@@ -169,6 +173,8 @@ describe 'matcherList' do
 end
 
 describe 'matcherDuck' do
+
+  pm = PatternMatcher.new
 
   psyduck = Object.new
 
@@ -199,36 +205,48 @@ describe 'matcherDuck' do
   end
 
   it 'cuack and fly with psyduck' do
-    result = duck(:cuack, :fly).call(psyduck) #=> true
+    result = pm.instance_eval do
+        duck(:cuack, :fly).call(psyduck) #=> true
+    end
     expect(result).to eq(true)
   end
 
   it 'cuack and fly with a dragon' do
-    result = duck(:cuack, :fly).call(a_dragon) #=> false
+    result = pm.instance_eval do
+      duck(:cuack, :fly).call(a_dragon) #=> false
+    end
     expect(result).to eq(false)
   end
 
   it 'a dragon can fly?' do
-    result = duck(:fly).call(a_dragon) #=> true
+    result = pm.instance_eval do
+      duck(:fly).call(a_dragon) #=> true
+    end
     expect(result).to eq(true)
   end
 
   it 'object to string' do
-    result = duck(:to_s).call(Object.new) #=> true
+    result = pm.instance_eval do
+      duck(:to_s).call(Object.new) #=> true
+    end
     expect(result).to eq(true)
   end
 end
 
 
 describe 'combinator and' do
-
+  pm = PatternMatcher.new
   it 'and true' do
-    bool = val(5).and(val(5.0)).call(5)
+    bool = pm.instance_eval do
+      val(5).and(val(5.0)).call(5)
+    end
     expect(bool).to eq(true)
   end
 
   it 'and false' do
-    bool = type(Integer).and(type(Module)).call(5)
+    bool = pm.instance_eval do
+      type(Integer).and(type(Module)).call(5)
+    end
     expect(bool).to eq(false)
   end
 
@@ -236,32 +254,44 @@ end
 
 describe 'combinator or' do
 
+  pm = PatternMatcher.new
+
   it 'or true1' do
-    bool = val(5).or(val(3)).call(5)
+    bool = pm.instance_eval do
+      val(5).or(val(3)).call(5)
+    end
     expect(bool).to eq(true)
   end
 
   it 'or true2' do
-    bool = val(5).or(val(3)).call(3)
+    bool = pm.instance_eval do
+      val(5).or(val(3)).call(3)
+    end
     expect(bool).to eq(true)
   end
 
   it 'or false' do
-    bool = val(4).or(val(3)).call(5)
+    bool = pm.instance_eval do
+      val(4).or(val(3)).call(5)
+    end
     expect(bool).to eq(false)
   end
 
 end
 
 describe 'combinator not' do
-
+  pm = PatternMatcher.new
   it 'not true' do
-    bool = type(String).not.call('soy un string')
+    bool = pm.instance_eval do
+      type(String).not.call('soy un string')
+    end
     expect(bool).to eq(false)
   end
 
   it 'not false' do
-    bool = type(Integer).not.call('no soy un numero')
+    bool = pm.instance_eval do
+      type(Integer).not.call('no soy un numero')
+    end
     expect(bool).to eq(true)
   end
 end
@@ -283,4 +313,47 @@ describe 'Pattern matcher' do
       with(type(Symbol)) { 'aca matchea' }
     end }.to raise_error(PatternMatcherException)
   end
+
+  it 'Validar ausencia de With`s`' do
+    #result='no llegue a nada'
+
+    expect{matches?(5) do
+      otherwise { result='aca no llega' }
+      #with(type(Integer)) { result='aca matchea' }
+    end}.to raise_error(PatternMatcherException)
+  end
+
+  it 'Validar With´s posteriores al Otherwise`' do
+    result='no llegue a nada'
+    expect{matches?(5) do
+      with(type(Module).and(val(5))) { result = 'aca no matchea' }
+      with(type(Integer)) { result='aca matchea' }
+      otherwise { result='aca no llega' }
+      with(type(Integer)) { result='aca matchea' }
+    end}.to raise_error(PatternMatcherException)
+  end
+
+  it 'Validar multiples Otherwise`' do
+    result='no llegue a nada'
+    expect{matches?(5) do
+      with(type(Module).and(val(5))) { result = 'aca no matchea' }
+      with(type(Integer)) { result='aca matchea' }
+      otherwise { result='aca no llega' }
+      otherwise { result='aca no llega' }
+    end}.to raise_error(PatternMatcherException)
+  end
+
 end
+
+=begin
+describe 'combinator and' do
+
+  it 'and true' do
+    pm = PatternMatcher.new
+    bool = pm.instance_eval do
+      val(4).or(val(3)).call(5)
+    end
+    expect(bool).to eq(false)
+  end
+end
+=end

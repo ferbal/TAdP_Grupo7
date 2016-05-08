@@ -1,30 +1,6 @@
-class Symbol
-  def call(obj)
-    true
-  end
-
-  def bind_with(obj, pattern_matcher)
-    pattern_matcher.define_singleton_method(self){obj}
-  end
-
-  def and(*matchers)
-    matchers.push self
-    matcher = matchers.shift
-    matcher.and(*matchers)
-  end
-
-  def or(*matchers)
-    matchers.push self
-    matcher = matchers.shift
-    matcher.or(*matchers)
-  end
-
-  def not
-    false
-  end
-end
 
 
+=begin
 def val(obj)
   Matcher.new {|n| n == obj}
  end
@@ -47,7 +23,7 @@ end
       }
     }
   end
-
+=end
  class Matcher
 
    attr_accessor :mproc, :vars
@@ -63,10 +39,6 @@ end
 
    def list(list_from_parameters, match_size = true)
 
-     #raise "Exceso de Parametros" if match_size.count>1
-
-     #match_size[0] = true if match_size.empty?
-
      @mproc= Proc.new do |list_from_proc|
        (match_size == true && list_from_proc.count == list_from_parameters.count && compare_array_elements(list_from_proc,list_from_parameters)) || match_size == false && compare_array_elements(list_from_proc,list_from_parameters)
      end
@@ -75,6 +47,9 @@ end
 
    def compare_array_elements(list_from_proc, list_from_parameters)
 
+     #list_from_proc.zip(list_from_parameters).any? do |element|
+     #  element.count(element.first) == 1
+     #end
      has_match = true
 
      list_from_parameters.each do |element_param|
