@@ -61,7 +61,7 @@ describe 'Binder' do
 
   it 'List + Combinator Binded Pattern' do
     result = matches?([1, 2, Object.new]) do
-      with(list([duck(:+).and(type(Fixnum),:x),
+      with(list([duck(:+).and(type(Fixnum), :x),
                  :y.or(val(4)), duck(:+).not])) { x + y }
       otherwise { 'aca no llega' }
     end

@@ -40,7 +40,10 @@ end
    def list(list_from_parameters, match_size = true)
 
      @mproc= Proc.new do |list_from_proc|
-       (match_size == true && list_from_proc.count == list_from_parameters.count && compare_array_elements(list_from_proc,list_from_parameters)) || match_size == false && compare_array_elements(list_from_proc,list_from_parameters)
+       #(match_size == true && list_from_proc.count == list_from_parameters.count && compare_array_elements(list_from_proc,list_from_parameters)) || match_size == false && compare_array_elements(list_from_proc,list_from_parameters)
+       result = list_from_proc.count == list_from_parameters.count && compare_array_elements(list_from_proc,list_from_parameters) if match_size
+       result = compare_array_elements(list_from_proc,list_from_parameters) if !match_size
+       result
      end
 
    end
