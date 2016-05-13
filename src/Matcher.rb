@@ -52,11 +52,11 @@
    end
 
    def bind_and_call(matcher, obj)
-     result = matcher.call(obj)
+
      if matcher.is_a? Symbol
-       bind_symbol(matcher,obj)
-     elsif !matcher.vars.empty?
-       get_previous_binds matcher,obj
+       result = bind_symbol(matcher,obj)
+     elsif matcher.is_a? Matcher
+       result = get_previous_binds matcher,obj
      end
      result
    end
@@ -70,8 +70,10 @@
 
    def get_previous_binds(matcher,obj)
      result = matcher.call(obj)
-     matcher.vars.each{|var| self.define_singleton_method(var){matcher.send(var)}}
-     self.vars.push(*matcher.vars)
+     if !matcher.vars.empty?
+       matcher.vars.each{|var| self.define_singleton_method(var){matcher.send(var)}}
+       self.vars.push(*matcher.vars)
+     end
      result
    end
 
